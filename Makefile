@@ -32,14 +32,15 @@ toolchain-all: toolchain-lin toolchain-win cppcheck
 
 crosstool-ng := $(LOCAL_DIR)/bin/ct-ng
 $(crosstool-ng):
-	$(WGET) "http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-$(CROSSTOOL_NG_VERSION).tar.bz2"
-	$(SHA256) crosstool-ng-$(CROSSTOOL_NG_VERSION).tar.bz2 6307b93a0abdd1b20b85305210094195825ff00a2ed8b650eeab21235088da4b
-	$(UNTAR) crosstool-ng-$(CROSSTOOL_NG_VERSION).tar.bz2
-	rm crosstool-ng-$(CROSSTOOL_NG_VERSION).tar.bz2
-	cd crosstool-ng-$(CROSSTOOL_NG_VERSION) && ./configure --prefix="$(LOCAL_DIR)"
-	cd crosstool-ng-$(CROSSTOOL_NG_VERSION) && make -j $(JOBS)
-	cd crosstool-ng-$(CROSSTOOL_NG_VERSION) && make install
-	rm -rf crosstool-ng-$(CROSSTOOL_NG_VERSION)
+	git clone "https://github.com/crosstool-ng/crosstool-ng.git" crosstool-ng
+	cd crosstool-ng && git checkout b49e4c689c4dc8e9c8da5b8f56d7ddf59e485d3b
+	cd crosstool-ng && ./bootstrap
+	cd crosstool-ng && ./configure --prefix="$(LOCAL_DIR)"
+	cd crosstool-ng && make -j $(JOBS)
+	cd crosstool-ng && make install
+	rm -rf crosstool-ng
+
+
 toolchain-lin := $(LOCAL_DIR)/x86_64-ubuntu16.04-linux-gnu
 toolchain-lin: $(toolchain-lin)
 $(toolchain-lin): $(crosstool-ng)
