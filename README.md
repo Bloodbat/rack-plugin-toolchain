@@ -158,4 +158,4 @@ Original readme from the VCV Rack Plugin toolchain repository follows:
 
     ## Acknowledgments
 
-    Thanks to @cschol for help with crosstool-ng, Ubuntu, Docker, and testing.
+Thanks to @cschol for help with crosstool-ng, Ubuntu, Docker, and testing.
