@@ -1,52 +1,55 @@
+FROM ghcr.io/bloodbat/rack-plugin-toolchain-ctng-windows:x86_64-w64-mingw32 AS ctng-windows
+FROM ghcr.io/bloodbat/rack-plugin-toolchain-ctng-linux:x86_64-ubuntu16.04 AS ctng-linux
+FROM ghcr.io/bloodbat/rack-plugin-toolchain-cppcheck:2.16.0 AS cppcheck
+
 FROM ubuntu:24.04
 ENV LANG=C.UTF-8
 
 ARG JOBS
-ARG MACOS_SDK_VERSION
 
 # Install make and sudo to bootstrap
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        make \
-        sudo \
-		ca-certificates \
-		git \
-		build-essential \
-		autoconf \
-		automake \
-		bison \
-		flex \
-		gawk \
-		libtool-bin \
-		libncurses5-dev \
-		unzip \
-		zip \
-		jq \
-		libgl-dev \
-		libglu-dev \
-		git \
-		wget \
-		curl \
-		cmake \
-		nasm \
-		xz-utils \
-		file \
-		python3 \
-		libxml2-dev \
-		libssl-dev \
-		texinfo \
-		help2man \
-		libz-dev \
-		rsync \
-		xxd \
-		perl \
-		coreutils \
-		zstd \
-		markdown \
-		libarchive-tools \
-		gettext \
-        libgmp-dev \
-        libmpfr-dev
+	make \
+	sudo \
+	ca-certificates \
+	git \
+	build-essential \
+	autoconf \
+	automake \
+	bison \
+	flex \
+	gawk \
+	libtool-bin \
+	libncurses5-dev \
+	unzip \
+	zip \
+	jq \
+	libgl-dev \
+	libglu-dev \
+	git \
+	wget \
+	curl \
+	cmake \
+	nasm \
+	xz-utils \
+	file \
+	python3 \
+	libxml2-dev \
+	libssl-dev \
+	texinfo \
+	help2man \
+	libz-dev \
+	rsync \
+	xxd \
+	perl \
+	coreutils \
+	zstd \
+	markdown \
+	libarchive-tools \
+	gettext \
+	libgmp-dev \
+	libmpfr-dev
 RUN echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Create unprivileged user to build toolchains and plugins
@@ -66,16 +69,9 @@ COPY Makefile /home/build/rack-plugin-toolchain/
 USER root
 RUN rm -rf /var/lib/apt/lists/*
 
+COPY --from=ctng-windows --chown=build:build /home/build/rack-plugin-toolchain/local /home/build/rack-plugin-toolchain/local
+COPY --from=ctng-linux --chown=build:build /home/build/rack-plugin-toolchain/local /home/build/rack-plugin-toolchain/local
+COPY --from=cppcheck --chown=build:build /home/build/rack-plugin-toolchain/local /home/build/rack-plugin-toolchain/local
+
 USER build
-COPY MacOSX${MACOS_SDK_VERSION}.sdk.tar.* /home/build/rack-plugin-toolchain/
-
-# Build toolchains
-RUN JOBS=$JOBS make toolchain-mac
-RUN JOBS=$JOBS make toolchain-win
-RUN JOBS=$JOBS make toolchain-lin
-
-RUN JOBS=$JOBS make cppcheck
-
-RUN JOBS=$JOBS make rack-sdk-all
-
-RUN rm MacOSX12.3.sdk.tar.*
+RUN make rack-sdk-all
