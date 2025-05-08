@@ -1,141 +1,161 @@
-# VCV Rack Plugin Toolchain
+# Docker Image of the VCV Rack Toolchain for building Windows and Linux plugins.
 
-**Cross-compile** VCV Rack plugins for all supported platforms with a single command on any GNU/Linux-based distribution.
+## SDK version: 2.6.3.
 
-**Analyze** plugin source code using open source static analysis tools (for example: cppcheck).
+**Cross-compile** VCV Rack plugins Windows and Linux using GitHub actions.
 
-## Supported platforms and architectures
+Derived from the official VCV Rack Plugin toolchain.
 
-The following platforms and architectures are supported by the VCV Rack Plugin Toolchain:
+---
 
-| Platform  | Architecture |
-|:---------:|:------------:|
-| GNU/Linux | x64          |
-| Windows   | x64          |
-| macOS     | x64, arm64   |
+Original readme from the VCV Rack Plugin toolchain repository follows:
 
-All supported platforms and architectures will be built by **cross-compilation in a GNU/Linux-based environment**.
+---
 
-Cross-platform support for using the toolchain on non-GNU/Linux platforms is provided via Docker (see below).
+    # VCV Rack Plugin Toolchain
 
-## Obtain the macOS SDK 12.3
+    **Cross-compile** VCV Rack plugins for all supported platforms with a single command on any GNU/Linux-based distribution.
 
-You must use a Mac computer for this step.
-You must generate this exact SDK version to build the Rack plugin toolchain.
+    **Analyze** plugin source code using open source static analysis tools (for example: cppcheck).
 
-Download [Xcode 14.0.1](https://developer.apple.com/services-account/download?path=/Developer_Tools/Xcode_14.0.1/Xcode_14.0.1.xip) and extract the .xip.
+    ## Supported platforms and architectures
 
-Extract the macOS SDK with [osxcross](https://github.com/tpoechtrager/osxcross).
-```bash
-git clone https://github.com/tpoechtrager/osxcross.git
-cd osxcross/tools
-XCODEDIR=~/Downloads/Xcode.app ./gen_sdk_package.sh
-```
-This generates `MacOSX12.3.sdk.tar.xz` in the `osxcross/tools` folder.
+    The following platforms and architectures are supported by the VCV Rack Plugin Toolchain:
 
-## Building
+    | Platform  | Architecture |
+    | :-------: | :----------: |
+    | GNU/Linux |     x64      |
+    |  Windows  |     x64      |
+    |   macOS   |  x64, arm64  |
 
-Clone this repository in a **path without spaces**, or the Makefile will break.
-Obtain `MacOSX12.3.sdk.tar.xz` above and place it in the root of this repository.
+    All supported platforms and architectures will be built by **cross-compilation in a GNU/Linux-based environment**.
 
-There are two ways to build the toolchains:
-- Locally on GNU/Linux: Uses your system's compilers to build the toolchains.
-- In a Docker container: This method uses a Ubuntu base image and installs all dependencies necessary to build the toolchains.
+    Cross-platform support for using the toolchain on non-GNU/Linux platforms is provided via Docker (see below).
 
-**NOTE:** The official VCV Rack plugin build system is based on Arch Linux.
+    ## Obtain the macOS SDK 12.3
 
-### Local toolchain build
+    You must use a Mac computer for this step.
+    You must generate this exact SDK version to build the Rack plugin toolchain.
 
-*Requires a GNU/Linux host.*
+    Download [Xcode 14.0.1](https://developer.apple.com/services-account/download?path=/Developer_Tools/Xcode_14.0.1/Xcode_14.0.1.xip) and extract the .xip.
 
-Install toolchain build dependencies.
-On Arch Linux,
-```bash
-sudo pacman -Syu
-make dep-arch-linux
-```
-or on Ubuntu,
-```bash
-sudo apt-get update
-make dep-ubuntu
-```
+    Extract the macOS SDK with [osxcross](https://github.com/tpoechtrager/osxcross).
+    ```bash
+    git clone https://github.com/tpoechtrager/osxcross.git
+    cd osxcross/tools
+    XCODEDIR=~/Downloads/Xcode.app ./gen_sdk_package.sh
+    ```
+    This generates `MacOSX12.3.sdk.tar.xz` in the `osxcross/tools` folder.
 
-Build toolchains for all three platforms.
-```bash
-make toolchain-all
-```
-Each toolchain will take around an hour to build and will require network access, about 8 GB free RAM, and about 15 GB free disk space.
-The final disk space after building is about 3.7 GB.
+    ## Building
 
-Build your plugin.
-```bash
-make -j$(nproc) plugin-build PLUGIN_DIR=...
-```
+    Clone this repository in a **path without spaces**, or the Makefile will break.
+    Obtain `MacOSX12.3.sdk.tar.xz` above and place it in the root of this repository.
 
-Built plugin packages are placed in the `plugin-build/` directory.
+    There are two ways to build the toolchains:
+    - Locally on GNU/Linux: Uses your system's compilers to build the toolchains.
+    - In a Docker container: This method uses a Ubuntu base image and installs all dependencies necessary to build the toolchains.
 
-Analyze your plugin source code.
+    **NOTE:** The official VCV Rack plugin build system is based on Arch Linux.
 
-```bash
-make -j$(nproc) plugin-analyze PLUGIN_DIR=...
-```
+    ### Local toolchain build
 
-### Docker toolchain build
+    *Requires a GNU/Linux host.*
 
-*Works on any operating system with [Docker](https://www.docker.com/) installed.*
+    Install toolchain build dependencies.
+    On Arch Linux,
+    ```bash
+    sudo pacman -Syu
+    make dep-arch-linux
+    ```
+    or on Ubuntu,
+    ```bash
+    sudo apt-get update
+    make dep-ubuntu
+    ```
 
-**IMPORTANT:** Do **not** invoke the Docker-based toolchain with `sudo`! There is no need to do so and it will not work correctly.
+    Build toolchains for all three platforms.
+    ```bash
+    make toolchain-all
+    ```
+    Each toolchain will take around an hour to build and will require network access, about 8 GB free RAM, and about 15 GB free disk space.
+    The final disk space after building is about 3.7 GB.
 
-Instead, follow the instructions to let non-root users manage Docker containers: https://docs.docker.com/engine/install/linux-postinstall/
+    Get Rack SDKs.
+    ```bash
+    make rack-sdk-all
+    ```
+    The Rack SDK version is defined in the Makefile.
 
-Build the Docker container with toolchains for all platforms.
-```bash
-make docker-build
-```
+    Build your plugin.
+    ```bash
+    make -j$(nproc) plugin-build PLUGIN_DIR=...
+    ```
 
-*Optional*: Pass number of jobs to use to for the tool chain build with the `JOBS` environment variable.
-```bash
-JOBS=$(nproc) make docker-build
-```
-(Just passing `-j$(nproc)` directly will not work due to the different build systems used in the toolchain build process.)
+    Built plugin packages are placed in the `plugin-build/` directory.
 
-Build your plugin.
+    Analyze your plugin source code.
+
+    ```bash
+    make -j$(nproc) plugin-analyze PLUGIN_DIR=...
+    ```
+
+    ### Docker toolchain build
+
+    *Works on any operating system with [Docker](https://www.docker.com/) installed.*
+
+    **IMPORTANT:** Do **not** invoke the Docker-based toolchain with `sudo`! There is no need to do so and it will not work correctly.
+
+    Instead, follow the instructions to let non-root users manage Docker containers: https://docs.docker.com/engine/install/linux-postinstall/
+
+    Build the Docker container with toolchains for all platforms.
+    ```bash
+    make docker-build
+    ```
+
+    *Optional*: Pass number of jobs to use to for the tool chain build with the `JOBS` environment variable.
+    ```bash
+    JOBS=$(nproc) make docker-build
+    ```
+    (Just passing `-j$(nproc)` directly will not work due to the different build systems used in the toolchain build process.)
+
+    Build your plugin.
 
 
-```bash
-make -j$(nproc) docker-plugin-build PLUGIN_DIR=...
-```
+    ```bash
+    make -j$(nproc) docker-plugin-build PLUGIN_DIR=...
+    ```
 
-Built plugin packages are placed in the `plugin-build/` directory.
+    Built plugin packages are placed in the `plugin-build/` directory.
 
-Analyze plugin source code.
+    Analyze plugin source code.
 
-```bash
-make -j$(nproc) docker-plugin-analyze PLUGIN_DIR=...
-```
+    ```bash
+    make -j$(nproc) docker-plugin-analyze PLUGIN_DIR=...
+    ```
 
-#### Notes for building and using the Docker-based toolchain on macOS
+    #### Notes for building and using the Docker-based toolchain on macOS
 
-- Ensure that Docker Desktop has sufficient amount of resources (RAM, disk space) allocated to build the toolchain!
-- You may have to add `MAKE=make` to the build command::
+    - Ensure that Docker Desktop has sufficient amount of resources (RAM, disk space) allocated to build the toolchain!
+    - You may have to add `MAKE=make` to the build command::
 
-```bash
-MAKE=make make -j$(nproc) docker-plugin-build PLUGIN_DIR=...
-```
+    ```bash
+    MAKE=make make -j$(nproc) docker-plugin-build PLUGIN_DIR=...
+    ```
 
-### Rack SDK management
+    ### Rack SDK management
 
-The latest Rack SDKs for all supported platforms are downloaded during the toolchain build.
+    The latest Rack SDKs for all supported platforms are downloaded during the toolchain build.
 
-The SDKs can be updated to the latest version (defined in the `Makefile`) as follows:
+    The SDKs can be updated to the latest version (defined in the `Makefile`) as follows:
 
-```bash
-make rack-sdk-clean
-make rack-sdk-all
-```
+    ```bash
+    make rack-sdk-clean
+    make rack-sdk-all
+    ```
 
-This is especially convenient for the Docker-based toolchain, because it does not require to rebuild the entire toolchain to update to the latest SDK.
+    This is especially convenient for the Docker-based toolchain, because it does not require to rebuild the entire toolchain to update to the latest SDK.
 
-## Acknowledgments
+    ## Acknowledgments
 
-Thanks to @cschol for help with crosstool-ng, Ubuntu, Docker, and testing.
+    Thanks to @cschol for help with crosstool-ng, Ubuntu, Docker, and testing.
