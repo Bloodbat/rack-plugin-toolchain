@@ -2,7 +2,7 @@
 
 ## SDK version: 2.6.4.
 
-**Cross-compile** VCV Rack plugins Windows and Linux using GitHub actions.
+**Cross-compile** VCV Rack plugins for Windows and Linux using GitHub actions.
 
 Derived from the official VCV Rack Plugin toolchain.
 
