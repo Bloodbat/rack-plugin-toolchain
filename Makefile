@@ -21,8 +21,8 @@ UNTAR := tar -x -f
 UNZIP := unzip
 SHA256 := sha256check() { echo "$$2  $$1" | sha256sum -c; }; sha256check
 
-RACK_SDK_VERSION := 2.6.3
-DOCKER_IMAGE_VERSION := 19
+RACK_SDK_VERSION := 2.6.6
+DOCKER_IMAGE_VERSION := 20
 
 all: toolchain-all rack-sdk-all
 
