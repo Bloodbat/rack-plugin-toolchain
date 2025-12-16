@@ -1,6 +1,6 @@
 # Docker Image of the VCV Rack Toolchain for building Windows and Linux plugins.
 
-## SDK version: 2.6.4.
+## SDK version: 2.6.6.
 
 **Cross-compile** VCV Rack plugins for Windows and Linux using GitHub actions.
 
@@ -158,4 +158,4 @@ Original readme from the VCV Rack Plugin toolchain repository follows:
 
     ## Acknowledgments
 
-Thanks to @cschol for help with crosstool-ng, Ubuntu, Docker, and testing.
+    Thanks to @cschol for help with crosstool-ng, Ubuntu, Docker, and testing.

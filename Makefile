@@ -22,7 +22,7 @@ UNZIP := unzip
 SHA256 := sha256check() { echo "$$2  $$1" | sha256sum -c; }; sha256check
 
 RACK_SDK_VERSION := 2.6.6
-DOCKER_IMAGE_VERSION := 19
+DOCKER_IMAGE_VERSION := 20
 
 all: toolchain-all rack-sdk-all
 
@@ -39,7 +39,6 @@ $(crosstool-ng):
 	cd crosstool-ng && make -j $(JOBS)
 	cd crosstool-ng && make install
 	rm -rf crosstool-ng
-
 
 toolchain-lin := $(LOCAL_DIR)/x86_64-ubuntu16.04-linux-gnu
 toolchain-lin: $(toolchain-lin)
