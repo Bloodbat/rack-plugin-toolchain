@@ -49,7 +49,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	libarchive-tools \
 	gettext \
 	libgmp-dev \
-	libmpfr-dev
+	libmpfr-dev \
+	pkg-config
+	
 RUN echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Create unprivileged user to build toolchains and plugins
@@ -64,6 +66,8 @@ RUN mkdir -p /home/build/rack-plugin-toolchain
 WORKDIR /home/build/rack-plugin-toolchain
 
 COPY Makefile /home/build/rack-plugin-toolchain/
+COPY linux.defconfig /home/build/rack-plugin-toolchain/
+COPY windows.defconfig /home/build/rack-plugin-toolchain/
 
 # Clean up files to free up space
 USER root
