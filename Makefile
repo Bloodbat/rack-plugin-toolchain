@@ -22,7 +22,7 @@ UNZIP := unzip
 SHA256 := sha256check() { echo "$$2  $$1" | sha256sum -c; }; sha256check
 
 RACK_SDK_VERSION := 2.6.6
-DOCKER_IMAGE_VERSION := 22
+DOCKER_IMAGE_VERSION := 23
 
 all: toolchain-all rack-sdk-all
 
@@ -33,7 +33,8 @@ toolchain-all: toolchain-lin toolchain-win cppcheck
 crosstool-ng := $(LOCAL_DIR)/bin/ct-ng
 $(crosstool-ng):
 	git clone "https://github.com/crosstool-ng/crosstool-ng.git" crosstool-ng
-	cd crosstool-ng && git checkout 899e015abf8c70088e8b67e87586ae81f305711c
+	# Crosstool-NG 1.29.0
+	cd crosstool-ng && git checkout d7a90ff11aae5e59d6acd8c491f0297c15b7fa37
 	cd crosstool-ng && ./bootstrap
 	cd crosstool-ng && ./configure --prefix="$(LOCAL_DIR)"
 	cd crosstool-ng && make -j $(JOBS)
@@ -52,7 +53,7 @@ $(toolchain-lin): $(crosstool-ng)
 	cd texinfo-7.2 && make install -j $(JOBS)
 	rm -rf texinfo-7.2
 
-	ct-ng x86_64-ubuntu16.04-linux-gnu
+	DEFCONFIG=linux.defconfig ct-ng defconfig
 	CT_PREFIX="$(LOCAL_DIR)" ct-ng build$(JOBS_CT_NG)
 	rm -rf .build .config build.log
 	# HACK Copy GL and related include dirs to toolchain sysroot
@@ -65,9 +66,7 @@ $(toolchain-lin): $(crosstool-ng)
 toolchain-win := $(LOCAL_DIR)/x86_64-w64-mingw32
 toolchain-win: $(toolchain-win)
 $(toolchain-win): $(crosstool-ng)
-	ct-ng x86_64-w64-mingw32
-	# I don't know how to set crosstool-ng variables from the command line
-	sed -i 's/CT_MINGW_W64_VERSION=.*/CT_MINGW_W64_VERSION="v10.0.0"/' .config
+	DEFCONFIG=windows.defconfig ct-ng defconfig
 	CT_PREFIX="$(LOCAL_DIR)" ct-ng build$(JOBS_CT_NG)
 	rm -rf .build .config build.log
 
@@ -80,7 +79,7 @@ $(cppcheck):
 	cd cppcheck-$(CPPCHECK_VERSION) && mkdir build
 	cd cppcheck-$(CPPCHECK_VERSION)/build \
 		&& cmake .. \
-		-DUSE_MATCHCOMPILER=On \
+		-DCMAKE_BUILD_TYPE=Release -DUSE_MATCHCOMPILER=On \
 		-DUSE_THREADS=On \
 		-DCMAKE_INSTALL_PREFIX=$(LOCAL_DIR)/cppcheck \
 		&& cmake --build . -j \
@@ -161,7 +160,8 @@ plugin-build-clean:
 
 static-analysis-cppcheck: export PATH := $(LOCAL_DIR)/cppcheck/bin:$(PATH)
 static-analysis-cppcheck: cppcheck
-	cd $(PLUGIN_DIR) && cppcheck src/ -isrc/dep --std=c++11 -j $(shell nproc) --error-exitcode=1
+	cd $(PLUGIN_DIR) && cppcheck src/ -isrc/dep --std=c++11 -j $(shell nproc) --error-exitcode=1 --suppress=normalCheckLevelMaxBranches
+
 
 plugin-analyze: static-analysis-cppcheck
 
